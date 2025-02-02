@@ -4,20 +4,18 @@ from datetime import datetime
 import os
 import matplotlib.pyplot as plt
 
-# Set page config - Must be the very first Streamlit command in the script
 st.set_page_config(page_title="Financial Dashboard", layout="wide")
 
-# Custom CSS to improve the app's appearance
+
 def local_css(file_name):
     with open(file_name, "r") as f:
         st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
-# Apply custom CSS
 local_css("style.css")
 
 # Load user details for authentication
 def authenticate_user(username, password):
-    user_df = pd.read_csv('E:/c desktop/WealthWhiz-main/WealthWhiz-main/user_details.csv')
+    user_df = pd.read_csv('user_details.csv')
     user = user_df[(user_df['Login'] == username) & (user_df['Password'] == password)]
     return not user.empty
 
@@ -48,11 +46,11 @@ def login():
 
 def view_expenses():
     if os.path.exists("exp.csv"):
-        # Load the expense data
+        
         df = pd.read_csv("exp.csv")
         
         st.markdown("<h2 style='text-align: center;'>Expense Table</h2>", unsafe_allow_html=True)
-        st.table(df)  # Display the DataFrame as a table
+        st.table(df)  
 
         # Allow the user to select a row to edit or delete
         st.markdown("<h3 style='text-align: center;'>Edit or Delete Expense</h3>", unsafe_allow_html=True)
@@ -69,9 +67,9 @@ def view_expenses():
                 df = df.drop(row_to_edit_or_delete).reset_index(drop=True)
                 df.to_csv("exp.csv", index=False)
                 st.success(f"Row {row_to_edit_or_delete} deleted successfully!")
-                st.rerun()  # Refresh the page to reflect the changes
+                st.rerun()  
 
-        # Edit form (if in edit mode)
+        # Edit form 
         if "edit_mode" in st.session_state and st.session_state["edit_mode"]:
             with st.form(key="edit_expense_form"):
                 st.write("Edit the selected expense:")
@@ -93,7 +91,7 @@ def view_expenses():
                     # Save the updated DataFrame to the CSV file
                     df.to_csv("exp.csv", index=False)
                     st.success("Expense updated successfully!")
-                    del st.session_state["edit_mode"]  # Exit edit mode
+                    del st.session_state["edit_mode"]  
                     st.rerun()
 
                 if cancel_button:
@@ -103,13 +101,13 @@ def view_expenses():
     else:
         st.warning("No expenses found. Add some expenses to view them here.")
 
-    # Add a button to go back to the dashboard
+    # Button to go back to the dashboard
     if st.button("Back to Dashboard"):
         st.session_state["current_page"] = "dashboard"
         st.rerun()
 
         
-# Function to add an expense and save it to CSV
+# Function to add an expense 
 def add_expense():
     st.markdown("<h2 style='text-align: center;'>Add Expense</h2>", unsafe_allow_html=True)
 
@@ -121,7 +119,7 @@ def add_expense():
 
     if submit_button:
         if amount > 0 and category and date:
-            # Capture current time when expense is added
+            # Capture time when expense is added
             current_time = datetime.now().strftime('%H:%M:%S')
 
             # Prepare the new expense entry with time
@@ -134,9 +132,8 @@ def add_expense():
 
             # Check if CSV file exists
             if os.path.exists("exp.csv"):
-                # Load existing data
+                
                 df = pd.read_csv("exp.csv")
-                # Append new data using pd.concat
                 df = pd.concat([df, new_expense], ignore_index=True)
             else:
                 # If no CSV file exists, new_expense becomes the DataFrame to save
@@ -148,17 +145,14 @@ def add_expense():
         else:
             st.error("Please fill all fields.")
 
-    # Add a button to go back to the dashboard
     if st.button("Back to Dashboard"):
         st.session_state["current_page"] = "dashboard"
         st.rerun()
-
 
 def dashboard():
     st.markdown("<h1 style='color: #2c3e50;'>Financial Dashboard</h1>", unsafe_allow_html=True)
 
     if os.path.exists("exp.csv"):
-        # Load the expense data
         df = pd.read_csv("exp.csv")
 
         # Total expenses
@@ -168,7 +162,6 @@ def dashboard():
         st.markdown("<h2 style='text-align: center;'>Overview</h2>", unsafe_allow_html=True)
         st.metric("Total Expenses", f"${total_expenses:,.2f}")
 
-    # Divider line and quick navigation buttons
     st.markdown("<hr>", unsafe_allow_html=True)
     st.markdown("<h2 style='text-align: center;'>Quick Navigation</h2>", unsafe_allow_html=True)
 
@@ -182,22 +175,21 @@ def dashboard():
             st.session_state["current_page"] = "view_expenses"
             st.rerun()
 
-    # Display the pie chart below the "Quick Navigation" section
+    # pie chart 
     if os.path.exists("exp.csv"):
-        # Group expenses by category
+       
         category_summary = df.groupby("Category")["Amount"].sum()
 
-        # Set font size for pie chart labels and reduce the size of the pie chart
-        plt.rcParams.update({'font.size': 8})  # Reduce font size for labels
+        # Set font size for pie chart labels
+        plt.rcParams.update({'font.size': 8})  
 
-        # Create a three-column layout and use the middle one for the pie chart
-        col1, col2, col3 = st.columns([1, 2, 1])  # Adjust the widths of the columns for 1/3 in the middle
+        col1, col2, col3 = st.columns([1, 2, 1])  # Adjust the widths of the columns
 
-        with col2:  # The middle column takes 1/3 of the screen width
+        with col2:  
             st.markdown("<h3 style='text-align: center;'>Expenses by Category</h3>", unsafe_allow_html=True)
-            fig, ax = plt.subplots(figsize=(3, 3))  # Adjust the figure size
+            fig, ax = plt.subplots(figsize=(3, 3))  
             ax.pie(category_summary, labels=category_summary.index, autopct='%1.1f%%', startangle=90, colors=plt.cm.Paired.colors)
-            ax.axis("equal")  # Equal aspect ratio ensures that the pie is drawn as a circle.
+            ax.axis("equal")  
             st.pyplot(fig)
 
 
@@ -216,7 +208,7 @@ def main():
         elif st.session_state["current_page"] == "add_expense":
             add_expense()
         elif st.session_state["current_page"] == "view_expenses":
-            view_expenses()  # Ensure this is called for the "View Expenses" page
+            view_expenses()  
 
 if __name__ == "__main__":
     main()
