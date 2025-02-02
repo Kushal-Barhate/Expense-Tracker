@@ -4,3 +4,5 @@ The Expense Management Application allows users to track their daily expenditure
 To use this application, place all the files in same directory.
 Install requirements using command 'pip install -r requirements.txt' 
 Run the application using command 'streamlit run "your file path" '
+
+The login credentials are: Username- nicholaswood,  Password- 123
